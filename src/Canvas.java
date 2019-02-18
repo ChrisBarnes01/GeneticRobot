@@ -155,7 +155,7 @@ public class Canvas extends JPanel implements ActionListener{
 		//doesn't occur beyond the starting setup
 		//Choose background image
 		g.drawImage(background, 0, 0, height, width, this);
-		setGrid(g2, 80, 80);
+		setGrid(g2, 40, 40);
 		//Now, draw goal; 
 		g2.setColor(Color.YELLOW);
 		Ellipse2D goal = new Ellipse2D.Double(goalX, goalY, 40, 40);
