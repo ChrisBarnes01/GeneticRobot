@@ -21,16 +21,17 @@ import javax.swing.Timer;
 public class Canvas extends JPanel implements ActionListener{
 	Timer t = new Timer(5, this);
 	//double x = 0, y = 0, velX = 2, velY = 2;
-	private ArrayList<Dot> dotsList = new ArrayList<Dot>(); 
+	//private ArrayList<Dot> dotsList = new ArrayList<Dot>(); 
+	private Dot[] dotsList;
 	private HashSet<Obstacle> obstacleList = new HashSet<Obstacle>(); 
 	
 	private ArrayList<Obstacle> tempVisitedSquaresList = new ArrayList<Obstacle>(); 
 
 	
-	public void AddDot(double x, double y, int acc) {
-		Dot newDot = new Dot(x, y, acc);
+	/*public void AddDot() {
+		Dot newDot = new Dot(width, height);
 		dotsList.add(newDot);
-	}
+	}*/
 	
 	int acceleraton = 1;
 	private int height;
@@ -41,7 +42,7 @@ public class Canvas extends JPanel implements ActionListener{
 	
 	private int startX = 100;
 	private int startY = 500; 
-	
+	private Population population;
 	
 	private int numXintervals;
 	private int numYintervals; 
@@ -49,9 +50,10 @@ public class Canvas extends JPanel implements ActionListener{
 	private int yGap = 1;
 	private Image background = new ImageIcon(this.getClass().getResource("treeHacksTest.png")).getImage();
 	
-	public Canvas(int height, int width) {
+	public Canvas(int height, int width, Population test) {
 		this.height = height;
 		this.width = width; 
+		this.population = test; 
 		
 		//Motion Adapter
 		addMouseMotionListener(new MouseMotionAdapter() {
@@ -77,9 +79,9 @@ public class Canvas extends JPanel implements ActionListener{
 	          public void mousePressed(MouseEvent me) { 
 	            //System.out.println(me.getX() + " || " +  me.getY()); 
 	        	if (me.getX() < width && me.getY() < height) {
-	        		Dot newDot = new Dot(me.getX(), me.getY(), acceleraton);
+	        		/*Dot newDot = new Dot(height, width);
 	            	acceleraton++;
-	            	dotsList.add(newDot);
+	            	dotsList.add(newDot);*/
 	            	//Determine Snap point:
 	            	int xSpot = (me.getX()/xGap); 
 	            	int ySpot = (me.getY()/yGap);
@@ -171,10 +173,10 @@ public class Canvas extends JPanel implements ActionListener{
 		
 		
 		//Here, add the buttons
-		Rectangle drawObst = new Rectangle(50, 1050, 200, 70);
-		g2.fill(drawObst);  
+		//Rectangle drawObst = new Rectangle(50, 1050, 200, 70);
+		//g2.fill(drawObst);  
 		
-		g2.drawString("Draw Obstacle", 50, 1050);
+		//g2.drawString("Draw Obstacle", 50, 1050);
 		
 		
 		
@@ -187,26 +189,43 @@ public class Canvas extends JPanel implements ActionListener{
 		}
 		 
 		//Draw all of the dots; and set the first one to green (later, change to "Best dot")
-		for (int i = 0; i < dotsList.size(); i++) {
-			if (i == 0) {
-				g2.setColor(Color.GREEN);
+		if (dotsList != null) {
+			for (int i = 0; i < dotsList.length; i++) {
+				if (dotsList[i].isBest()) {
+					g2.setColor(Color.GREEN);
+				}
+				else {
+					g2.setColor(Color.BLACK);
+				}
+				Dot myDot = dotsList[i];
+				Ellipse2D dot = new Ellipse2D.Double(myDot.getX(), myDot.getY(), 20, 20);
+				g2.fill(dot);
 			}
-			else {
-				g2.setColor(Color.BLACK);
-			}
-			Dot myDot = dotsList.get(i);
-			Ellipse2D dot = new Ellipse2D.Double(myDot.getX(), myDot.getY(), 20, 20);
-			g2.fill(dot);
 		}
 		t.start();
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-		for (int i = 0; i < dotsList.size(); i++) {
-			double curX = dotsList.get(i).getX();
-			int acc = dotsList.get(i).getAcc();
-			dotsList.get(i).setX(curX + acc);
+		if (population.allDotsDead()) {
+			population.calculateFitness();
+			population.naturalSelection();
+			population.mutateDemBabies();
 		}
+		else {
+			dotsList = population.dots;
+			population.update();
+		}
+		//dotsList = population.dots;
+		/*for (Dot dot: population.dots) {
+			System.out.println(dot.getX());
+		}*/
+		//Dot newDot = new Dot(1000, 1000);
+		//newDot.update();
+		//System.out.println("TEST THIS");
+		//System.out.println(newDot.getX());
+		//System.out.println(newDot.getY());
+
+		//population.update(); 
 		repaint();
 	}
 	
