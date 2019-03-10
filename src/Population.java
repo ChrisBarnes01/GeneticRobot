@@ -1,3 +1,4 @@
+import java.util.HashSet;
 import java.util.Random;
 
 public class Population{
@@ -5,6 +6,8 @@ public class Population{
   double fitnessSum; 
   int gen = 1; 
   int bestDot; 
+  private HashSet<Obstacle> obstacleList; 
+
   
   int minStep = 400; 
   
@@ -16,10 +19,10 @@ public class Population{
     return shifted; // == (rand.nextDouble() * (max-min)) + min;
   }
   
-  public Population(int size, int height, int width){
+  public Population(int size, int height, int width, HashSet<Obstacle> obstacleList){
     dots = new Dot[size];
     for (int i = 0; i < size; i++){
-      dots[i] = new Dot(height, width); 
+      dots[i] = new Dot(height, width, obstacleList); 
     }
   }
   
@@ -28,6 +31,13 @@ public class Population{
      dots[i].show(); 
    }
    dots[0].show();
+  }
+  
+  public void updateObstacleList(HashSet<Obstacle> list) {
+	  obstacleList = list; 
+	  for(int i = 0; i < dots.length; i++) {
+		  dots[i].updateObstacleList(list);
+	  }
   }
 
   
@@ -68,17 +78,14 @@ public class Population{
     calculateFitnessSum(); 
 
     newDots[0] = dots[bestDot].gimmeBaby(); 
-    System.out.println("Best Dot");
-    System.out.println(dots[bestDot]);
     newDots[0].setBest(true); 
+    
     for(int i = 1; i < newDots.length; i ++){
-       
       //select parent based on fitness; 
-      Dot parent = selectParent(); 
-      System.out.println("Parent");
-      System.out.println(parent);
-      //get baby from them
-      newDots[i] = parent.gimmeBaby(); 
+    	Dot parent = selectParent(); 
+    	newDots[i] = parent.gimmeBaby(); 
+    	newDots[i].setBest(false);
+		newDots[i].mutateBrain();
     }
     dots = newDots; 
     gen++;
@@ -96,14 +103,14 @@ public class Population{
   
   private Dot selectParent(){
     double rand = randomInRange(0.0000, fitnessSum);
-    System.out.println("Random!!!!!");
-    System.out.println(rand);
+    System.out.println("FitnessSum: " + fitnessSum);
+    System.out.println("Random # Selection: " + rand);
     double runningSum = 0; 
-    System.out.println("running Sum");
     for (int i = 0; i < dots.length; i++){
-    	System.out.print(dots[i].getFitness());
+    	//System.out.print(dots[i].getFitness());
       runningSum += dots[i].getFitness(); 
       if (runningSum > rand){
+    	System.out.println("Selected Dot: " + i);
         return dots[i];
       }
     }
@@ -115,8 +122,15 @@ public class Population{
   //____________________________________________________________________
   
   public void mutateDemBabies(){
+	System.out.println("FITNESS FOR 0: " + dots[0].isBest());
+	
+    //int j = 0; 
     for(int i = 1; i < dots.length; i++){
-      dots[i].brain.mutate(); 
+    	if (!dots[i].isBest()) {
+    		//j += 1;
+    		//System.out.println(j);
+    		//dots[i].mutateBrain();
+    	}
     }
   }
   
@@ -132,6 +146,7 @@ public class Population{
     }
     
     bestDot = maxIndex;
+    dots[maxIndex].setBest(true);
     
     if(dots[bestDot].hasReachedGoal()){
       minStep = dots[bestDot].brain.getStep();

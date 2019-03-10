@@ -1,3 +1,5 @@
+import java.awt.geom.Point2D;
+import java.util.HashSet;
 
 public class Dot {
 	private int width; 
@@ -11,6 +13,8 @@ public class Dot {
 	private boolean reachedGoal = false; 
 	private boolean dead = false; 
 	private boolean isBest = false; 
+	private HashSet<Obstacle> obstacleList; 
+
 	
 	public double getX() {
 		return pos[0];
@@ -19,12 +23,15 @@ public class Dot {
 	public double getY() {
 		return pos[1];
 	}
+	public void mutateBrain() {
+		brain.mutate();
+	}
 	
 	
 	//*NEW STUFF ______________________________________________________________
 	
 	  
-	  Dot(int canvasWidth, int canvasHeight){
+	  Dot(int canvasWidth, int canvasHeight, HashSet<Obstacle> obstacleList){
 	    brain = new Brain(400); 
 	    pos = new double[2];
 	    //pos[0] = width/2;
@@ -37,8 +44,10 @@ public class Dot {
 	    goal = new int[2];
 	    pos[0] = width/2;
 	    pos[1] = height-10;
-	    goal[0] = 500;
+	    goal[0] = 900;
 	    goal[1] = 500;
+		obstacleList = obstacleList; 
+
 	  }
 	  
 	  
@@ -87,10 +96,30 @@ public class Dot {
 	      if (pos[0]<2 || pos[1]<2 || pos[0] > width-2 || pos[1] >height -2) {
 	        dead = true; 
 	      }
-	      /*else if (Math.sqrt((goal[1] - pos[1]) * (goal[1] - pos[1]) + (goal[0] - pos[0]) * (goal[0] - pos[0])) < 5){
+	      else if ((pos[0] > goal[0] - 20 && pos[0] < goal[0] + 20) && (pos[1] > goal[1] - 20 && pos[1] < goal[1] + 20)){
 	        //if reached goal; 
 	        reachedGoal = true; 
-	      }*/
+	      }
+	      else {
+	    	  if (obstacleList != null) {
+	    		  //System.out.println("obstacle size " + obstacleList.size());
+	    		  for (Obstacle obs: obstacleList) {
+		    		  //int x = 2;
+	    			  System.out.println("CALCULATING OBSTACLES!!");
+		    		  //if ((pos[0] < obs.getX() + 38 && pos[0] >= obs.getX()) && (pos[1] > obs.getY() && pos[1] < obs.getY() + 38)) {
+	    			  System.out.println("OBST X: " + obs.getX() + " || OBS Y: " + obs.getY());
+	    			  if (pos[0] == obs.getX()) {
+		    			  dead = true;
+		    		  }
+		    	  }
+	    	  }
+	    	  //for (Obstacle obs: obstacleList) {
+	    		  //int x = 2;
+	    		  //if ((pos[0] < obs.getX() + 38 && pos[0] >= obs.getX()) && (pos[1] > obs.getY() && pos[1] < obs.getY() + 38)) {
+	    			  //dead = true;
+	    		  //}
+	    	  //}
+	      }
 	      /*else if (pos[0] < 700 && pos[1] < 310 && pos[0] > 100 && pos[1] > 300){
 	        dead = true; 
 	      }*/
@@ -104,18 +133,24 @@ public class Dot {
 	    if (reachedGoal){
 	      fitness = 1.0/16.0 + 1000.0/(double)(brain.getStep() * brain.getStep()); 
 	    }else{
-	    	fitness = 1.0;
+	    	//fitness = 1.0;
 	    	//double distanceToGoal = Math.sqrt((goal[1] - pos[1]) * (goal[1] - pos[1]) + (goal[0] - pos[0]) * (goal[0] - pos[0]));
-	    	//fitness = 1.0/(distanceToGoal * distanceToGoal); 
+	    	double distanceToGoal = Point2D.distance(goal[0], goal[1], pos[0], pos[1]);
+	    	//double distanceToGoal = Math.sqrt(((goal[1] - pos[1]) * (goal[1] - pos[1])));
+	    	//fitness = distanceToGoal; 
+	    	fitness = 1.0/(distanceToGoal); 
+	    	//fitness = 1.0/(Math.random());
 	    }
 	  }
 	  
 	  public Dot gimmeBaby(){
-	    Dot baby = new Dot(width, height); 
+	    Dot baby = new Dot(width, height, obstacleList); 
 	    baby.brain = brain.clone(); 
-	    System.out.println("baby");
-	    System.out.println(baby);
 	    return baby; 
+	  }
+	  
+	  public void updateObstacleList(HashSet<Obstacle> list) {
+		  obstacleList = list;
 	  }
 	  
 	  public void setDead(boolean bool) {

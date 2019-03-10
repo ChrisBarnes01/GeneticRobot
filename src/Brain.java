@@ -40,11 +40,20 @@ public class Brain{
     double mutationRate = 0.01; 
     for (int i = 0; i < directions.length; i++){
       double random = randomInRange(0, 1);
+      
+
       if (random < mutationRate){
-        double x = randomInRange(-1, 1);
-        double y = randomInRange(-1, 1);
-        directions[i][0] = x;
-        directions[i][1] = y;
+    	  System.out.println("RANDOM RATE: " + random);
+          System.out.println("Mutation Rate: " + mutationRate);
+    	  //double angle = Math.toRadians(Math.random() * 360);
+    	//System.out.println("I AM BEING MUTATED!!!!");
+        //directions[i][0] = Math.cos(angle);
+    	directions[i][0] = randomInRange(-1.0, 1.0);
+    	directions[i][1] = randomInRange(-1.0, 1.0);
+        //directions[i][1] = Math.sin(angle);
+      }
+      else {
+    	  //System.out.println("NO MUTATION!!");
       }
     }
   }
